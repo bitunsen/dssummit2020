@@ -12,6 +12,7 @@ def is_valid_chromosome(chromosome, num_of_queens):
             is_valid = False
     return is_valid
 
+
 class EightQueenProblemTestCase(unittest.TestCase):
     def test_gene_constructor(self):
         try:
@@ -75,8 +76,6 @@ class EightQueenProblemTestCase(unittest.TestCase):
             pass
         else:
             self.fail("Unknown Exception raised.")
-
-
 
     def test_generate_initial_population(self):
         number_of_queens = 8
