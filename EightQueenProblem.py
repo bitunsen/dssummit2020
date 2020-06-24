@@ -392,30 +392,35 @@ def generate_initial_population(_context):
     return _context.get_population_pool()
 
 
-def calculate_fitness_score_sum(_context, input_chromosome):
-    if not isinstance(input_chromosome, Chromosome):
-        raise TypeError("Invalid argument - Only object of type Chromosome is expected.")
+"""
+This method reads a line containing all valid solutions of 8 Queens. It reads each line and 
+compare with the input solution
 
-    _data = input_chromosome.get_raw_data_sequence()[:]
-    _non_attacking_queen = [0] * _context.get_num_of_queens()
-    for index in range(len(_data)):
-        current_point = Gene(index, _data[index])
-        # current_point.print("Current Queen :: ")
-        attacking_queen = 0
-        current_attacking_points = _context.get_all_attacking_points_from_dictionary(current_point)
-        for i in range(len(_data)):
-            if i == index:
-                continue
-            other_queen = Gene(i, _data[i])
-            for attacking_point in current_attacking_points:
-                if other_queen.equals(attacking_point):
-                    attacking_queen = attacking_queen + 1
-                    # other_queen.print("Attacking Queen :: ")
+"""
 
-        _non_attacking_queen[index] = ((len(_data) - 1) - attacking_queen)
-        # print(non_attacking_queen)
-        input_chromosome.fitness_score = np.sum(_non_attacking_queen)
-    return input_chromosome.fitness_score
+
+def validate_fitness_score(_data_array):
+    all_solution_file = open('8queen_all_solutions.txt', 'r')
+    _lines = all_solution_file.readlines()
+    _is_valid = False
+    for line in _lines:
+        line = line.rstrip()
+        _str_array = line.split(",")
+        _num_array = [int(str_value) for str_value in _str_array]
+
+        if _num_array == _data_array:
+            _is_valid = True
+            break
+
+    return _is_valid
+
+
+"""
+    This function is responsible to calculate the fitness score of one particular chromosome
+    It finds out total number of non-attacking queen pairs for each Gene (position of a queen)
+    and then sum it up. Now, one gene can have maximum 7 non-attacking queens, in that case, 
+    the fitness score of a correct sequence will be 56 (7*8).  
+"""
 
 
 def calculate_fitness_score(_context, input_chromosome):
@@ -423,7 +428,7 @@ def calculate_fitness_score(_context, input_chromosome):
         raise TypeError("Invalid argument - Only object of type Chromosome is expected.")
 
     _data = input_chromosome.get_raw_data_sequence()[:]
-    _non_attacking_queen = [0 for i in range(_context.get_num_of_queens())]
+    _non_attacking_queen = [0] * _context.get_num_of_queens()
     for index in range(len(_data)):
         current_point = Gene(index, _data[index])
         # current_point.print("Current Queen :: ")
@@ -451,7 +456,6 @@ def run_parent_selection_process(_context):
     _score_array = []
     _selected_parent_pool = []
     _selected_parent_index_set = set()
-    initial_pool_size = len(_context.get_population_pool())
     _selected_parent_pool_size = int(_context.get_size_of_population() / 2)
 
     if _selected_parent_pool_size % 2 != 0:
@@ -508,41 +512,57 @@ def execute_crossover_mutation(_context, _selected_parent_pool):
 
 if __name__ == "__main__":
 
-    number_of_queens = 8
-    execution_context = GAContext(10, number_of_queens, 0.1)
-    current_generation = 1
-    _max_generation = 1000
-    target_chromosome_array = [Chromosome([0 for i in range(number_of_queens)])]
-    _initial_population_pool = generate_initial_population(execution_context)
-    _max_scored_chromosome = _initial_population_pool[0]
-    _max_possible_score = number_of_queens * (number_of_queens - 1)
+    try:
+        number_of_queens = 8
+        execution_context = GAContext(10, number_of_queens, 0.1)
+        current_generation = 1
+        _max_generation = 1000
+        target_chromosome = [Chromosome([0] * number_of_queens)]
+        _initial_population_pool = generate_initial_population(execution_context)
+        _max_scored_chromosome = _initial_population_pool[0]
+        _max_possible_score = number_of_queens * (number_of_queens - 1)
+        _target_solution_found = False
 
-    if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
-        target_chromosome_array[0] = _max_scored_chromosome
-        _max_scored_chromosome.print_chromosome(
-            "Generation #" + str(current_generation) + " Target Chromosome :: ")
-    else:
+        if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
+            target_chromosome = _max_scored_chromosome
+            _max_scored_chromosome.print_chromosome(
+                "Generation #" + str(current_generation) + " Target Chromosome :: ")
+            _target_solution_found = True
+        else:
 
-        while True:
-            selected_parent_pool, max_score = run_parent_selection_process(execution_context)
-            _initial_population_pool = execute_crossover_mutation(execution_context, selected_parent_pool)
-            _max_scored_chromosome = _initial_population_pool[0]
-            current_generation = current_generation + 1
-            execution_context.set_current_generation(current_generation)
+            while True:
+                selected_parent_pool, max_score = run_parent_selection_process(execution_context)
+                _initial_population_pool = execute_crossover_mutation(execution_context, selected_parent_pool)
+                _max_scored_chromosome = _initial_population_pool[0]
+                current_generation = current_generation + 1
+                execution_context.set_current_generation(current_generation)
 
-            if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
-                target_chromosome_array[0] = _max_scored_chromosome
-                _max_scored_chromosome.print_chromosome(
-                    "Generation #" + str(current_generation) + " Target Chromosome :: ")
-                break
+                if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
+                    target_chromosome = _max_scored_chromosome
+                    _max_scored_chromosome.print_chromosome(
+                        "Generation #" + str(current_generation) + " Target Chromosome :: ")
+                    _target_solution_found = True
+                    break
 
-            if current_generation > _max_generation:
-                print("Number of Maximum Generation limit crossed. Terminating the engine....")
-                break
+                if current_generation > _max_generation:
+                    print("Number of Maximum Generation limit crossed. Terminating the engine....")
+                    break
 
-            highest_score_candidate = _initial_population_pool[0]
-            second_highest_score_candidate = _initial_population_pool[1]
-            if current_generation % 10 == 0:
-                highest_score_candidate.print_chromosome("Generation #" + str(current_generation) + " ::: Highest ")
-                second_highest_score_candidate.print_chromosome(
-                    "Generation #" + str(current_generation) + " ::: Second Highest ")
+                highest_score_candidate = _initial_population_pool[0]
+                second_highest_score_candidate = _initial_population_pool[1]
+                if current_generation % 10 == 0:
+                    highest_score_candidate.print_chromosome("Generation #" + str(current_generation) + " ::: Highest ")
+                    second_highest_score_candidate.print_chromosome(
+                        "Generation #" + str(current_generation) + " ::: Second Highest ")
+
+        if _target_solution_found:
+            target_chromosome.print_chromosome("Generation #" + str(current_generation) + " ::: Final ")
+            is_valid = validate_fitness_score(target_chromosome.get_raw_data_sequence())
+            if is_valid:
+                print("The final sequence {} is a valid solution.".format(target_chromosome.get_raw_data_sequence()))
+            else:
+                print("The final sequence {} is a not valid solution.".format(target_chromosome.get_raw_data_sequence()))
+
+    except (TypeError, ValueError):
+        raise
+
