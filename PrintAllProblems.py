@@ -1,10 +1,15 @@
 ''' Python3 program to solve N Queen Problem using
-backtracking '''
+backtracking
+
+https://www.geeksforgeeks.org/printing-solutions-n-queen-problem/
+This code is contributed by YatinGupta in geeksforgeeks
+
+'''
 k = 1
 
 
 # A utility function to print solution
-def printSolution(board):
+def print_solution(board):
     global k
     print(k, "-\n")
     k = k + 1
@@ -28,17 +33,17 @@ So we need to check only left side for
 attacking queens '''
 
 
-def isSafe(board, row, col):
+def is_safe(board, row, col):
     # Check this row on left side
     for i in range(col):
-        if (board[row][i]):
+        if board[row][i]:
             return False
 
     # Check upper diagonal on left side
     i = row
     j = col
     while i >= 0 and j >= 0:
-        if (board[i][j]):
+        if board[i][j]:
             return False;
         i -= 1
         j -= 1
@@ -47,7 +52,7 @@ def isSafe(board, row, col):
     i = row
     j = col
     while j >= 0 and i < 8:
-        if (board[i][j]):
+        if board[i][j]:
             return False
         i = i + 1
         j = j - 1
@@ -59,11 +64,11 @@ def isSafe(board, row, col):
 Queen problem '''
 
 
-def solveNQUtil(board, col):
+def solve_n_queen_util(board, col):
     ''' base case: If all queens are placed
     then return true '''
-    if (col == 8):
-        printSolution(board)
+    if col == 8:
+        print_solution(board)
         return True
 
     ''' Consider this column and try placing  
@@ -73,13 +78,13 @@ def solveNQUtil(board, col):
 
         ''' Check if queen can be placed on  
         board[i][col] '''
-        if (isSafe(board, i, col)):
+        if is_safe(board, i, col):
             # Place this queen in board[i][col]
             board[i][col] = 1;
 
             # Make result true if any placement
             # is possible
-            res = solveNQUtil(board, col + 1) or res;
+            res = solve_n_queen_util(board, col + 1) or res
 
             ''' If placing queen in board[i][col]  
             doesn't lead to a solution, then  
@@ -101,17 +106,16 @@ solutions, this function prints one of the
 feasible solutions.'''
 
 
-def solveNQ():
+def solve_n_queen_problem():
     board = [[0 for j in range(10)]
              for i in range(10)]
 
-    if (solveNQUtil(board, 0) == False):
+    if solve_n_queen_util(board, 0) == False:
         print("Solution does not exist")
         return
     return
 
 
 # Driver Code
-solveNQ()
+solve_n_queen_problem()
 
-# This code is contributed by YatinGupta
