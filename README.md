@@ -9,7 +9,7 @@ https://youtu.be/RxTfc4JLYKs?list=PLRqwX-V7Uu6bJM3VgzjNV5YxVxUwzALHV
 https://youtu.be/9zfeTw-uFCw?list=PLRqwX-V7Uu6bJM3VgzjNV5YxVxUwzALHV
 
 After submission:
-C:\Development_Avecto\Anaconda3\envs\Project01\python.exe C:/BITUN/DataScience/Cognizant/Week1/dssummit2020/SubmitChallenge.py
+C:\Development_Avecto\Anaconda3\envs\Project01\python.exe Week1/dssummit2020/SubmitChallenge.py
 {"No Of Attempts lapsed out of 3": 1, "submittedConfiguration": [4, 0, 7, 5, 2, 6, 1, 3], "configurationStatus": "Valid", "configurationScore": 100.0}
 
 Process finished with exit code 0
