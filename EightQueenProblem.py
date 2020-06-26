@@ -400,17 +400,16 @@ compare with the input solution
 
 
 def validate_fitness_score(_data_array):
-    all_solution_file = open('8queen_all_solutions.txt', 'r')
-    _lines = all_solution_file.readlines()
     _is_valid = False
-    for line in _lines:
-        line = line.rstrip()
-        _str_array = line.split(",")
-        _num_array = [int(str_value) for str_value in _str_array]
+    with open('8queen_all_solutions.txt', 'r') as file_1:
+        for line in file_1:
+            line = line.rstrip()
+            _str_array = line.split(",")
+            _num_array = [int(str_value) for str_value in _str_array]
 
-        if _num_array == _data_array:
-            _is_valid = True
-            break
+            if _num_array == _data_array:
+                _is_valid = True
+                break
 
     return _is_valid
 
@@ -465,6 +464,12 @@ def run_parent_selection_process(_context):
     return _selected_parent_pool, _max_score
 
 
+"""
+This method will perform the crossover and mutation on a selected set of parents
+and produce children for next generation
+"""
+
+
 def execute_crossover_mutation(_context, _selected_parent_pool):
     _num_of_selected_parents = len(_selected_parent_pool)
     _mating_pool = []
@@ -510,21 +515,22 @@ def execute_crossover_mutation(_context, _selected_parent_pool):
     return _context.get_population_pool()
 
 
-if __name__ == "__main__":
-
+def execute_generate_eight_queen_solution(_number_of_queens=8,
+                                          _number_of_members_in_pool=10,
+                                          _mutation_rate=0.1):
+    _target_chromosome = Chromosome([0] * _number_of_queens)
+    _is_valid = False
+    _target_solution_found = False
     try:
-        number_of_queens = 8
-        execution_context = GAContext(10, number_of_queens, 0.1)
+        execution_context = GAContext(_number_of_members_in_pool, _number_of_queens, _mutation_rate)
         current_generation = 1
         _max_generation = 1000
-        target_chromosome = [Chromosome([0] * number_of_queens)]
         _initial_population_pool = generate_initial_population(execution_context)
         _max_scored_chromosome = _initial_population_pool[0]
-        _max_possible_score = number_of_queens * (number_of_queens - 1)
-        _target_solution_found = False
+        _max_possible_score = _number_of_queens * (_number_of_queens - 1)
 
         if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
-            target_chromosome = _max_scored_chromosome
+            _target_chromosome = _max_scored_chromosome
             _max_scored_chromosome.print_chromosome(
                 "Generation #" + str(current_generation) + " Target Chromosome :: ")
             _target_solution_found = True
@@ -538,7 +544,7 @@ if __name__ == "__main__":
                 execution_context.set_current_generation(current_generation)
 
                 if _max_scored_chromosome.get_fitness_score() == _max_possible_score:
-                    target_chromosome = _max_scored_chromosome
+                    _target_chromosome = _max_scored_chromosome
                     _max_scored_chromosome.print_chromosome(
                         "Generation #" + str(current_generation) + " Target Chromosome :: ")
                     _target_solution_found = True
@@ -546,6 +552,7 @@ if __name__ == "__main__":
 
                 if current_generation > _max_generation:
                     print("Number of Maximum Generation limit crossed. Terminating the engine....")
+                    _is_valid = False
                     break
 
                 highest_score_candidate = _initial_population_pool[0]
@@ -556,13 +563,29 @@ if __name__ == "__main__":
                         "Generation #" + str(current_generation) + " ::: Second Highest ")
 
         if _target_solution_found:
-            target_chromosome.print_chromosome("Generation #" + str(current_generation) + " ::: Final ")
-            is_valid = validate_fitness_score(target_chromosome.get_raw_data_sequence())
-            if is_valid:
-                print("The final sequence {} is a valid solution.".format(target_chromosome.get_raw_data_sequence()))
+            _target_chromosome.print_chromosome("Generation #" + str(current_generation) + " ::: Final ")
+            _is_valid = validate_fitness_score(_target_chromosome.get_raw_data_sequence())
+            if _is_valid:
+                print("The final sequence {} is a valid solution.".format(_target_chromosome.get_raw_data_sequence()))
             else:
-                print("The final sequence {} is a not valid solution.".format(target_chromosome.get_raw_data_sequence()))
+                print(
+                    "The final sequence {} is a not valid solution.".format(_target_chromosome.get_raw_data_sequence()))
 
     except (TypeError, ValueError):
         raise
 
+    return _target_chromosome, _target_solution_found
+
+
+if __name__ == "__main__":
+
+    try:
+        _target_chromosome, is_target_solution_found = execute_generate_eight_queen_solution(8, 10, 0.1)
+
+        if is_target_solution_found:
+            print("The target sequence {}.".format(_target_chromosome.get_raw_data_sequence()))
+        else:
+            print("Unable to find any target sequence withing 2000 generations.")
+
+    except (TypeError, ValueError):
+        raise
